@@ -6,11 +6,6 @@
         tableStyle="min-width: 75rem"
         striped-rows
         class="bg-slate-100/80"
-        :pt="{
-            header: (options) => ({
-                class: ['!py-3 !px-0'],
-            }),
-        }"
     >
         <template #header>
             <div class="flex justify-between gap-2 mb-3">
@@ -75,8 +70,6 @@
             </template>
         </Column>
         <Column field="guest_name" header="Guest Name"></Column>
-
-        <!-- Kolom Status yang Diperbarui -->
         <Column field="status" header="Status">
             <template #body="slotProps">
                 <span :class="['p-tag', getStatusClass(slotProps.data.status)]">
@@ -84,7 +77,6 @@
                 </span>
             </template>
         </Column>
-
         <Column header="Total Person" field="total_person"> </Column>
         <Column field="total_price" header="Price">
             <template #body="slotProps">
@@ -112,30 +104,67 @@
             </template>
         </Column>
 
-        <!-- Kolom Actions yang Diperbarui (Hanya satu) -->
+        <!-- Kolom Actions yang Diperbarui dengan Logika Check-in -->
         <Column header="Actions" class="w-52">
             <template #body="slotProps">
-                <!-- Tombol Aksi untuk status 'pending' -->
-                <div v-if="slotProps.data.status === 'pending'">
+                <!-- Aksi untuk status 'pending' -->
+                <div
+                    v-if="slotProps.data.status === 'pending'"
+                    class="flex gap-2"
+                >
                     <Button
                         icon="pi pi-check"
                         aria-label="Confirm"
                         size="small"
-                        class="mr-2 p-button-success"
+                        class="p-button-success"
                         @click="confirmBooking(slotProps.data.id, 'confirm')"
                     />
                     <Button
                         icon="pi pi-times"
                         aria-label="Cancel"
                         size="small"
-                        class="mr-2 p-button-danger"
+                        class="p-button-danger"
                         @click="confirmBooking(slotProps.data.id, 'cancel')"
                     />
                 </div>
-                <!-- Pesan jika status bukan 'pending' -->
-                <span v-else class="font-bold text-gray-500">
-                    No action available
-                </span>
+
+                <!-- Aksi untuk status 'confirmed' -->
+                <div
+                    v-else-if="slotProps.data.status === 'confirmed'"
+                    class="flex gap-2"
+                >
+                    <!-- Tombol Check-in BARU KITA -->
+                    <Button
+                        v-if="!slotProps.data.checkin_time"
+                        label="Check-in"
+                        icon="pi pi-sign-in"
+                        size="small"
+                        class="p-button-primary"
+                        @click="checkinBooking(slotProps.data.id)"
+                    />
+                    <!-- Tombol Hapus hanya muncul setelah check-in -->
+                    <Button
+                        v-else
+                        aria-label="Delete"
+                        icon="pi pi-trash"
+                        severity="danger"
+                        size="small"
+                        outlined
+                        @click="confirmDelete(slotProps.data.id)"
+                    />
+                </div>
+
+                <!-- Aksi untuk status 'canceled' -->
+                <div v-else class="flex gap-2">
+                    <Button
+                        aria-label="Delete"
+                        icon="pi pi-trash"
+                        severity="danger"
+                        size="small"
+                        outlined
+                        @click="confirmDelete(slotProps.data.id)"
+                    />
+                </div>
             </template>
         </Column>
 
@@ -180,8 +209,9 @@ const props = defineProps({
     },
 });
 
-// Fungsi baru untuk konfirmasi dan pembatalan
 const confirm = useConfirm();
+const toast = useToast();
+
 function confirmBooking(bookingId, action) {
     const message =
         action === "confirm"
@@ -197,8 +227,8 @@ function confirmBooking(bookingId, action) {
         accept: () => {
             const routeName =
                 action === "confirm"
-                    ? "admin.bookings.confirm"
-                    : "admin.bookings.cancel";
+                    ? "admin.reservations.confirm"
+                    : "admin.reservations.cancel";
             router.put(
                 route(routeName, bookingId),
                 {},
@@ -210,7 +240,25 @@ function confirmBooking(bookingId, action) {
     });
 }
 
-// Fungsi baru untuk memberi warna pada status
+// FUNGSI BARU UNTUK CHECK-IN
+function checkinBooking(bookingId) {
+    confirm.require({
+        message: "Are you sure you want to check-in this guest?",
+        header: "Check-in Confirmation",
+        icon: "pi pi-info-circle",
+        acceptClass: "p-button-primary",
+        accept: () => {
+            router.put(
+                route("admin.reservations.checkin", bookingId),
+                {},
+                {
+                    preserveScroll: true,
+                }
+            );
+        },
+    });
+}
+
 function getStatusClass(status) {
     if (status === "pending") return "p-tag-warning";
     if (status === "confirmed") return "p-tag-success";
@@ -218,7 +266,6 @@ function getStatusClass(status) {
     return "";
 }
 
-// Formatting the data strings
 function formatCurrency(currency) {
     return new Intl.NumberFormat("id-ID", {
         style: "currency",
@@ -233,13 +280,11 @@ function getDate(date) {
 function getDateTime(date) {
     if (date) {
         let newDate = new Date(date);
-        return newDate.toLocaleString();
+        return newDate.toLocaleString("id-ID"); // Menggunakan format Indonesia
     }
-    return null;
+    return "N/A"; // Menampilkan N/A jika kosong
 }
 
-// Delete Confirmation And Actions
-const toast = useToast();
 function confirmDelete(id) {
     confirm.require({
         message: `Are you sure you want to delete reservation #${id}?`,
@@ -262,7 +307,6 @@ function confirmDelete(id) {
     });
 }
 
-// Filter Dialog
 const dialog = useDialog();
 function showFilter() {
     dialog.open(Filter, {

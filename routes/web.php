@@ -8,17 +8,6 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
 Route::get("/", [BookingController::class, "index"])->name("index");
 
 Route::middleware(["auth"])->as("user.")->group(function () {
@@ -27,7 +16,6 @@ Route::middleware(["auth"])->as("user.")->group(function () {
     Route::patch("/profile", [ProfileController::class, "update"])->name("profile.update");
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post("/profile/image", [ProfileController::class, 'updateProfileImage'])->name("profile.updateProfileImage");
-
     Route::post("/reserve", [BookingController::class, "store"])->name("reserve");
 });
 
@@ -48,10 +36,12 @@ Route::middleware(['auth', 'admin'])->prefix("admin")->as("admin.")->group(funct
     Route::resource('reservations', ReservationController::class);
 
     // ====================================================================
-    // == BARIS BARU YANG DITAMBAHKAN ADA DI BAWAH INI ==
+    // == ROUTE BARU UNTUK CHECK-IN ADA DI BAWAH INI ==
     // ====================================================================
-    Route::put('/bookings/{booking}/confirm', [ReservationController::class, 'confirm'])->name('admin.bookings.confirm');
-    Route::put('/bookings/{booking}/cancel', [ReservationController::class, 'cancel'])->name('admin.bookings.cancel');
+    Route::put('/reservations/{booking}/confirm', [ReservationController::class, 'confirm'])->name('reservations.confirm');
+    Route::put('/reservations/{booking}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+    Route::put('/reservations/{booking}/checkin', [ReservationController::class, 'checkin'])->name('reservations.checkin');
+
 
     // Room
     Route::get("/rooms/archives", [RoomController::class, "archives"])->name("rooms.archives");

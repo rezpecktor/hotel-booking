@@ -28,6 +28,7 @@ class ReservationController extends Controller
      */
     public function index()
     {
+        // LOGIKA CACHE DIHAPUS, SEKARANG SELALU MENGAMBIL DATA BARU
         $reservations = Reservation::with('user', 'rooms:room_number')
             ->search(request(['from_date', 'to_date']))
             ->latest()
@@ -50,6 +51,9 @@ class ReservationController extends Controller
             'reservations' => $reservations
         ]);
     }
+
+    // ... sisa method lainnya tetap sama ...
+    // (copy-paste seluruh kode di bawah ini untuk memastikan tidak ada yang terlewat)
 
     /**
      * Show the form for creating a new resource.
@@ -197,14 +201,11 @@ class ReservationController extends Controller
         return redirect()->route('admin.reservations.index');
     }
 
-    // ====================================================================
-    // == METHOD LAMA 'complete' DIGANTI MENJADI 'confirm' ==
-    // ====================================================================
     public function confirm(Reservation $booking)
     {
         $this->authorize('update', $booking);
 
-        $booking->status = 'confirmed'; // Status diubah menjadi 'confirmed'
+        $booking->status = 'confirmed';
         $booking->save();
 
         Cache::flush();
@@ -212,18 +213,26 @@ class ReservationController extends Controller
         return redirect()->route('admin.reservations.index')->with('message', 'Booking has been confirmed successfully.');
     }
 
-    // ====================================================================
-    // == METHOD BARU 'cancel' UNTUK MEMBATALKAN PESANAN ==
-    // ====================================================================
     public function cancel(Reservation $booking)
     {
         $this->authorize('update', $booking);
 
-        $booking->status = 'canceled'; // Status diubah menjadi 'canceled'
+        $booking->status = 'canceled';
         $booking->save();
 
         Cache::flush();
 
         return redirect()->route('admin.reservations.index')->with('message', 'Booking has been canceled.');
     }
+    public function checkin(Reservation $booking)
+{
+    $this->authorize('update', $booking);
+
+    $booking->checkin_time = now(); // Mengisi waktu check-in dengan waktu sekarang
+    $booking->save();
+
+    return redirect()->route('admin.reservations.index')->with('message', 'Guest checked-in successfully.');
 }
+}
+
+
