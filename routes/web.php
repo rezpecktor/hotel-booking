@@ -47,6 +47,11 @@ Route::middleware(['auth', 'admin'])->prefix("admin")->as("admin.")->group(funct
     Route::patch("/reservations/{reservations}/restore", [ReservationController::class, "restore"])->name("reservations.restore");
     Route::resource('reservations', ReservationController::class);
 
+    // ====================================================================
+    // == BARIS BARU YANG DITAMBAHKAN ADA DI BAWAH INI ==
+    // ====================================================================
+    Route::put('/bookings/{booking}/complete', [ReservationController::class, 'complete'])->name('admin.bookings.complete');
+
     // Room
     Route::get("/rooms/archives", [RoomController::class, "archives"])->name("rooms.archives");
     Route::patch("/rooms/{rooms}/restore", [RoomController::class, "restore"])->name("rooms.restore");

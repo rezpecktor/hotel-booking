@@ -4,17 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReservationRequest;
-use App\Jobs\SendBookingMailJob;
-use App\Jobs\SendUpdateBookingMailJob;
-use App\Mail\BookingNotificationMail;
-use App\Mail\BookingUpdateMail;
 use App\Models\Reservation;
 use App\Models\Room;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -33,12 +28,10 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        if(Cache::has('reservation_list'.request('page',1))){
-            $reservations = Cache::get('reservation_list'.request('page',1));
-        }
-        else{
-            $reservations = Reservation::with('user', 'rooms:room_number')
+        // Kita modifikasi query ini untuk selalu mengambil data terbaru demi status
+        $reservations = Reservation::with('user', 'rooms:room_number')
             ->search(request(['from_date', 'to_date']))
+            ->latest() // Mengurutkan dari yang terbaru
             ->paginate(5)
             ->withQueryString()
             ->through(fn($reservation) => [
@@ -51,9 +44,9 @@ class ReservationController extends Controller
                 'to_date' => $reservation->to_date,
                 'checkin_time' => $reservation->checkin_time,
                 'checkout_time' => $reservation->checkout_time,
+                'status' => $reservation->status, // <-- PERUBAHAN PENTING ADA DI SINI
             ]);
-            Cache::put('reservation_list'.request('page',1),$reservations,now()->addMinute(30));
-        }
+
         return Inertia::render('Reservation/Index', [
             'reservations' => $reservations
         ]);
@@ -112,7 +105,7 @@ class ReservationController extends Controller
      */
     public function show(Reservation $reservation)
     {
-    $reservation->load('rooms');//also retrieve data from detail
+        $reservation->load('rooms');//also retrieve data from detail
         return Inertia::render('Reservation/Show', [
             'id' => $reservation->id,
             'guest_name' => $reservation->guest_name,
@@ -123,7 +116,6 @@ class ReservationController extends Controller
             'room_ids' => $reservation->rooms->pluck('id'),
             'checkin_time' => $reservation->checkin_time ?? Carbon::now(),
             'checkout_time' => $reservation->checkout_time ?? Carbon::now(),
-            // 'reservation_details' => $reservation->reservationDetails,
         ]);
     }
 
@@ -132,7 +124,6 @@ class ReservationController extends Controller
      */
     public function edit(Reservation $reservation)
     {
-
         return Inertia::render('Reservation/Edit', [
             'id' => $reservation->id,
             'guest_name' => $reservation->guest_name,
@@ -153,15 +144,12 @@ class ReservationController extends Controller
      */
     public function update(ReservationRequest $request, Reservation $reservation)
     {
-
-        //update the data from reservation
         $reservation->guest_name=$request->guest_name;
         $reservation->total_person=$request->total_person;
         $reservation->total_price=$request->total_price;
         $reservation->from_date = Carbon::parse($request->from_date);
         $reservation->to_date = Carbon::parse($request->to_date);
 
-        //update the check in and out time if provided
         if($request->has('checkin_time')){
             $reservation->checkin_time = Carbon::parse($request->checkin_time);
         }
@@ -169,10 +157,8 @@ class ReservationController extends Controller
             $reservation->checkout_time = Carbon::parse($request->checkout_time);
         }
 
-        //remove the current reservation detail and will add new later on
         DB::table('reservation_room')->where('reservation_id',$reservation->id)->delete();
 
-        //add new detail
         foreach($request->room_id as $room){
             DB::table('reservation_room')->insert([
                 'room_id'=>$room,
@@ -181,16 +167,9 @@ class ReservationController extends Controller
             ]);
         }
 
-        //save the changes
         $reservation->save();
         Cache::flush();
-        if(Auth::user()->role_id === 2){
-            SendUpdateBookingMailJob::dispatch($reservation, Auth::user()->email);
-        } else {
-            SendUpdateBookingMailJob::dispatch($reservation, $reservation->user->email);
-        }
 
-        //redirect, may need to update later
         return redirect()->route('admin.reservations.index');
     }
 
@@ -217,5 +196,20 @@ class ReservationController extends Controller
         $reservation->restore();
         Cache::flush();
         return redirect()->route('admin.reservations.index');
+    }
+
+    // ====================================================================
+    // == METHOD BARU YANG DITAMBAHKAN ADA DI BAWAH INI ==
+    // ====================================================================
+    public function complete(Reservation $booking)
+    {
+        $this->authorize('update', $booking); // Otorisasi
+
+        $booking->status = 'completed';
+        $booking->save();
+
+        Cache::flush(); // Membersihkan cache agar data terbaru tampil
+
+        return redirect()->route('admin.reservations.index')->with('message', 'Booking marked as completed successfully.');
     }
 }

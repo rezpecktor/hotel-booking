@@ -37,7 +37,8 @@
                 v-model="roomForm.price"
                 inputId="integeronly"
                 mode="currency"
-                currency="MMK"
+                currency="IDR"
+                locale="id-ID"
             />
             <InlineMessage v-if="errors.price" severity="error" class="mt-2">{{
                 errors.price
