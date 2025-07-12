@@ -28,10 +28,9 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        // Kita modifikasi query ini untuk selalu mengambil data terbaru demi status
         $reservations = Reservation::with('user', 'rooms:room_number')
             ->search(request(['from_date', 'to_date']))
-            ->latest() // Mengurutkan dari yang terbaru
+            ->latest()
             ->paginate(5)
             ->withQueryString()
             ->through(fn($reservation) => [
@@ -44,7 +43,7 @@ class ReservationController extends Controller
                 'to_date' => $reservation->to_date,
                 'checkin_time' => $reservation->checkin_time,
                 'checkout_time' => $reservation->checkout_time,
-                'status' => $reservation->status, // <-- PERUBAHAN PENTING ADA DI SINI
+                'status' => $reservation->status,
             ]);
 
         return Inertia::render('Reservation/Index', [
@@ -105,7 +104,7 @@ class ReservationController extends Controller
      */
     public function show(Reservation $reservation)
     {
-        $reservation->load('rooms');//also retrieve data from detail
+        $reservation->load('rooms');
         return Inertia::render('Reservation/Show', [
             'id' => $reservation->id,
             'guest_name' => $reservation->guest_name,
@@ -199,17 +198,32 @@ class ReservationController extends Controller
     }
 
     // ====================================================================
-    // == METHOD BARU YANG DITAMBAHKAN ADA DI BAWAH INI ==
+    // == METHOD LAMA 'complete' DIGANTI MENJADI 'confirm' ==
     // ====================================================================
-    public function complete(Reservation $booking)
+    public function confirm(Reservation $booking)
     {
-        $this->authorize('update', $booking); // Otorisasi
+        $this->authorize('update', $booking);
 
-        $booking->status = 'completed';
+        $booking->status = 'confirmed'; // Status diubah menjadi 'confirmed'
         $booking->save();
 
-        Cache::flush(); // Membersihkan cache agar data terbaru tampil
+        Cache::flush();
 
-        return redirect()->route('admin.reservations.index')->with('message', 'Booking marked as completed successfully.');
+        return redirect()->route('admin.reservations.index')->with('message', 'Booking has been confirmed successfully.');
+    }
+
+    // ====================================================================
+    // == METHOD BARU 'cancel' UNTUK MEMBATALKAN PESANAN ==
+    // ====================================================================
+    public function cancel(Reservation $booking)
+    {
+        $this->authorize('update', $booking);
+
+        $booking->status = 'canceled'; // Status diubah menjadi 'canceled'
+        $booking->save();
+
+        Cache::flush();
+
+        return redirect()->route('admin.reservations.index')->with('message', 'Booking has been canceled.');
     }
 }

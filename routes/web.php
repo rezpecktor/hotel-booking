@@ -50,7 +50,8 @@ Route::middleware(['auth', 'admin'])->prefix("admin")->as("admin.")->group(funct
     // ====================================================================
     // == BARIS BARU YANG DITAMBAHKAN ADA DI BAWAH INI ==
     // ====================================================================
-    Route::put('/bookings/{booking}/complete', [ReservationController::class, 'complete'])->name('admin.bookings.complete');
+    Route::put('/bookings/{booking}/confirm', [ReservationController::class, 'confirm'])->name('admin.bookings.confirm');
+    Route::put('/bookings/{booking}/cancel', [ReservationController::class, 'cancel'])->name('admin.bookings.cancel');
 
     // Room
     Route::get("/rooms/archives", [RoomController::class, "archives"])->name("rooms.archives");

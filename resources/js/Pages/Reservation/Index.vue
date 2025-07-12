@@ -74,23 +74,17 @@
                 </span>
             </template>
         </Column>
-
         <Column field="guest_name" header="Guest Name"></Column>
 
+        <!-- Kolom Status yang Diperbarui -->
         <Column field="status" header="Status">
             <template #body="slotProps">
-                <span
-                    :class="[
-                        'p-tag',
-                        slotProps.data.status === 'pending'
-                            ? 'p-tag-warning'
-                            : 'p-tag-success',
-                    ]"
-                >
+                <span :class="['p-tag', getStatusClass(slotProps.data.status)]">
                     {{ slotProps.data.status }}
                 </span>
             </template>
         </Column>
+
         <Column header="Total Person" field="total_person"> </Column>
         <Column field="total_price" header="Price">
             <template #body="slotProps">
@@ -117,46 +111,34 @@
                 {{ getDateTime(slotProps.data.checkout_time) }}
             </template>
         </Column>
+
+        <!-- Kolom Actions yang Diperbarui (Hanya satu) -->
         <Column header="Actions" class="w-52">
             <template #body="slotProps">
-                <Button
-                    icon="pi pi-pencil"
-                    aria-label="Submit"
-                    size="small"
-                    outlined
-                    class="mr-2"
-                    @click="
-                        () =>
-                            router.visit(
-                                route(
-                                    'admin.reservations.edit',
-                                    slotProps.data.id
-                                )
-                            )
-                    "
-                />
-
-                <Button
-                    v-if="slotProps.data.status === 'pending'"
-                    icon="pi pi-check"
-                    aria-label="Complete"
-                    size="small"
-                    class="mr-2 p-button-success"
-                    @click="completeBooking(slotProps.data.id)"
-                />
-                <span v-else class="p-tag p-tag-success">Completed</span>
-
-                <Button
-                    aria-label="Delete"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    size="small"
-                    outlined
-                    @click.prevent="confirmDelete(slotProps.data.id)"
-                    :key="`confirmDialog${slotProps.data.id}`"
-                />
+                <!-- Tombol Aksi untuk status 'pending' -->
+                <div v-if="slotProps.data.status === 'pending'">
+                    <Button
+                        icon="pi pi-check"
+                        aria-label="Confirm"
+                        size="small"
+                        class="mr-2 p-button-success"
+                        @click="confirmBooking(slotProps.data.id, 'confirm')"
+                    />
+                    <Button
+                        icon="pi pi-times"
+                        aria-label="Cancel"
+                        size="small"
+                        class="mr-2 p-button-danger"
+                        @click="confirmBooking(slotProps.data.id, 'cancel')"
+                    />
+                </div>
+                <!-- Pesan jika status bukan 'pending' -->
+                <span v-else class="font-bold text-gray-500">
+                    No action available
+                </span>
             </template>
         </Column>
+
         <template #footer>
             <div class="flex justify-between">
                 <div class="">
@@ -198,10 +180,42 @@ const props = defineProps({
     },
 });
 
-function completeBooking(bookingId) {
-    if (confirm("Are you sure you want to mark this booking as completed?")) {
-        router.put(route("admin.bookings.complete", bookingId));
-    }
+// Fungsi baru untuk konfirmasi dan pembatalan
+const confirm = useConfirm();
+function confirmBooking(bookingId, action) {
+    const message =
+        action === "confirm"
+            ? "Are you sure you want to confirm this booking?"
+            : "Are you sure you want to cancel this booking?";
+
+    confirm.require({
+        message: message,
+        header: "Confirmation",
+        icon: "pi pi-info-circle",
+        acceptClass:
+            action === "confirm" ? "p-button-success" : "p-button-danger",
+        accept: () => {
+            const routeName =
+                action === "confirm"
+                    ? "admin.bookings.confirm"
+                    : "admin.bookings.cancel";
+            router.put(
+                route(routeName, bookingId),
+                {},
+                {
+                    preserveScroll: true,
+                }
+            );
+        },
+    });
+}
+
+// Fungsi baru untuk memberi warna pada status
+function getStatusClass(status) {
+    if (status === "pending") return "p-tag-warning";
+    if (status === "confirmed") return "p-tag-success";
+    if (status === "canceled") return "p-tag-danger";
+    return "";
 }
 
 // Formatting the data strings
@@ -225,7 +239,6 @@ function getDateTime(date) {
 }
 
 // Delete Confirmation And Actions
-const confirm = useConfirm();
 const toast = useToast();
 function confirmDelete(id) {
     confirm.require({

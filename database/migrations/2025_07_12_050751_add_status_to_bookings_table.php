@@ -10,19 +10,21 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::table('bookings', function (Blueprint $table) {
-        $table->string('status')->default('pending')->after('to_date'); // Menambah kolom status
-    });
-}
+    {
+        // Menggunakan nama tabel yang benar: 'reservations'
+        Schema::table('reservations', function (Blueprint $table) {
+            $table->string('status')->default('pending')->after('to_date');
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            //
+        // Logika untuk menghapus kolom jika migrasi di-rollback
+        Schema::table('reservations', function (Blueprint $table) {
+            $table->dropColumn('status');
         });
     }
 };

@@ -1,45 +1,42 @@
-import "primeicons/primeicons.css";
-import "primevue/resources/themes/md-light-indigo/theme.css";
-import "../css/app.css";
 import "./bootstrap";
+import "../css/app.css";
+import "primeicons/primeicons.css";
+import "primevue/resources/themes/lara-light-indigo/theme.css";
 
+import { createApp, h } from "vue";
 import { createInertiaApp } from "@inertiajs/vue3";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
+import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/vue.m";
+
+// 1. IMPORT SEMUA SERVICE YANG DIBUTUHKAN
 import PrimeVue from "primevue/config";
 import ConfirmationService from "primevue/confirmationservice";
-import DialogService from "primevue/dialogservice";
 import ToastService from "primevue/toastservice";
-import { createApp, h } from "vue";
-import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/vue.m";
-import Layout from "./Layouts/Layout.vue";
+import DialogService from "primevue/dialogservice";
+
+const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
 createInertiaApp({
-    title: (title) => `${title} - Laracamp Booking`,
-    // resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) =>
+        resolvePageComponent(
+            `./Pages/${name}.vue`,
+            import.meta.glob("./Pages/**/*.vue")
+        ),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
-            .use(plugin)
-            .use(ZiggyVue, Ziggy)
-            .use(PrimeVue)
-            .use(ToastService)
-            .use(DialogService)
-            .use(ConfirmationService)
-            .mount(el);
+        return (
+            createApp({ render: () => h(App, props) })
+                .use(plugin)
+                .use(ZiggyVue, Ziggy)
+                // 2. GUNAKAN SEMUA SERVICE DI SINI
+                .use(PrimeVue, { ripple: true })
+                .use(ConfirmationService)
+                .use(ToastService)
+                .use(DialogService)
+                .mount(el)
+        );
     },
     progress: {
         color: "#4B5563",
-    },
-    resolve: (name) => {
-        const page = resolvePageComponent(
-            `./Pages/${name}.vue`,
-            import.meta.glob("./Pages/**/*.vue")
-        );
-        page.then((module) => {
-            if (name.startsWith("Room/")) {
-                // Jika halaman ada di folder Room
-                module.default.layout = AdminLayout; // Terapkan AdminLayout
-            }
-        });
-        return page;
     },
 });
