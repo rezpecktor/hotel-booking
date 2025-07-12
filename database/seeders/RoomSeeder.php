@@ -2,115 +2,53 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class RoomSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('rooms')->insert([
-            'room_number' => '121',
-            'room_type_id' => 1,
-            'bed_type' => 'Single',
-            'number_of_bed' => 1,
-            'price' => 40000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Kamar Tipe Standart (ID: 1) - Harga: 200000
+        $standartRooms = ['101', '102', '103', '104', '105', '106'];
+        foreach ($standartRooms as $roomNumber) {
+            DB::table('rooms')->insert([
+                'room_number' => $roomNumber,
+                'room_type_id' => 1,
+                'bed_type' => 'Double',
+                'number_of_bed' => 1,
+                'price' => 200000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
-        DB::table('rooms')->insert([
-            'room_number' => '122',
-            'room_type_id' => 2,
-            'bed_type' => 'Double',
-            'number_of_bed' => 1,
-            'price' => 60000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Kamar Tipe Deluxe (ID: 2) - Harga: 250000
+        $deluxeRooms = ['201', '202', '203', '204', '205', '206'];
+        foreach ($deluxeRooms as $roomNumber) {
+            DB::table('rooms')->insert([
+                'room_number' => $roomNumber,
+                'room_type_id' => 2,
+                'bed_type' => 'Double',
+                'number_of_bed' => 1,
+                'price' => 250000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
-        DB::table('rooms')->insert([
-            'room_number' => '123',
-            'room_type_id' => 3,
-            'bed_type' => 'Single',
-            'number_of_bed' => 1,
-            'price' => 800000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('rooms')->insert([
-            'room_number' => '124',
-            'room_type_id' => 4,
-            'bed_type' => 'Double',
-            'number_of_bed' => 1,
-            'price' => 100000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('rooms')->insert([
-            'room_number' => '125',
-            'room_type_id' => 5,
-            'bed_type' => 'Double',
-            'number_of_bed' => 1,
-            'price' => 150000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('rooms')->insert([
-            'room_number' => '126',
-            'room_type_id' => 1,
-            'bed_type' => 'Single',
-            'number_of_bed' => 1,
-            'price' => 40000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('rooms')->insert([
-            'room_number' => '127',
-            'room_type_id' => 2,
-            'bed_type' => 'Double',
-            'number_of_bed' => 1,
-            'price' => 60000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('rooms')->insert([
-            'room_number' => '128',
-            'room_type_id' => 3,
-            'bed_type' => 'Single',
-            'number_of_bed' => 1,
-            'price' => 800000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('rooms')->insert([
-            'room_number' => '129',
-            'room_type_id' => 4,
-            'bed_type' => 'Double',
-            'number_of_bed' => 1,
-            'price' => 100000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('rooms')->insert([
-            'room_number' => '130',
-            'room_type_id' => 5,
-            'bed_type' => 'Double',
-            'number_of_bed' => 1,
-            'price' => 150000,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Kamar Tipe Executive (ID: 3) - Harga: 300000
+        $executiveRooms = ['301', '302'];
+        foreach ($executiveRooms as $roomNumber) {
+            DB::table('rooms')->insert([
+                'room_number' => $roomNumber,
+                'room_type_id' => 3,
+                'bed_type' => 'Double',
+                'number_of_bed' => 1,
+                'price' => 300000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }

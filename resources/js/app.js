@@ -29,12 +29,17 @@ createInertiaApp({
     progress: {
         color: "#4B5563",
     },
-    resolve: async (name) => {
-        const page = await resolvePageComponent(
+    resolve: (name) => {
+        const page = resolvePageComponent(
             `./Pages/${name}.vue`,
             import.meta.glob("./Pages/**/*.vue")
         );
-        page.default.layout = page.default.layout || Layout;
+        page.then((module) => {
+            if (name.startsWith("Room/")) {
+                // Jika halaman ada di folder Room
+                module.default.layout = AdminLayout; // Terapkan AdminLayout
+            }
+        });
         return page;
     },
 });
