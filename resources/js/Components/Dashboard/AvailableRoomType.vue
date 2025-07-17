@@ -1,50 +1,87 @@
 <template>
-  <div class="">
-    <h1 class="mb-6 text-2xl font-semibold">Today's Available Room Types</h1>
-    <Chart type="pie" :data="chartData" :options="chartOptions" class="w-full" />
-  </div>
+    <div class="flex flex-col h-full">
+        <h1 class="mb-4 text-2xl font-semibold text-center">
+            Available Room Types Today
+        </h1>
+        <div class="relative flex-1">
+            <Chart
+                ref="chartComponent"
+                type="doughnut"
+                :data="chartData"
+                :options="chartOptions"
+                class="absolute top-0 left-0 w-full h-full"
+            />
+        </div>
+    </div>
 </template>
 
 <script setup>
-  import Chart from "primevue/chart"
-  import { ref, onMounted, computed } from "vue"
+import Chart from "primevue/chart";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 
-  const props = defineProps({
-    availableRoomTypes: Object
-  })
+const chartComponent = ref(null);
 
-  const mutatedAvailableRoomTypes = computed(() => ({ labels: Object.keys(props.availableRoomTypes), data: Object.values(props.availableRoomTypes) }))
+const props = defineProps({
+    availableRoomTypes: Object,
+});
 
-  const chartData = ref({});
-  const chartOptions = ref({
+const mutatedAvailableRoomTypes = computed(() => ({
+    labels: Object.keys(props.availableRoomTypes),
+    data: Object.values(props.availableRoomTypes),
+}));
+
+const chartData = ref({});
+const chartOptions = ref({
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          usePointStyle: true,
-        }
-      }
+        legend: {
+            position: "bottom",
+            labels: {
+                usePointStyle: true,
+            },
+        },
+    },
+});
+
+const redrawChart = () => {
+    if (chartComponent.value) {
+        chartComponent.value.reinit();
     }
-  });
+};
 
-  onMounted(() => {
+onMounted(() => {
     chartData.value = setChartData();
-  });
+    window.addEventListener("resize", redrawChart);
+});
 
-  const setChartData = () => {
+onBeforeUnmount(() => {
+    window.removeEventListener("resize", redrawChart);
+});
+
+const setChartData = () => {
     const documentStyle = getComputedStyle(document.body);
-
     return {
-      labels: mutatedAvailableRoomTypes.value.labels,
-      datasets: [
-        {
-          data: mutatedAvailableRoomTypes.value.data,
-          backgroundColor: [documentStyle.getPropertyValue('--blue-500'), documentStyle.getPropertyValue('--yellow-500'), documentStyle.getPropertyValue('--green-500'), documentStyle.getPropertyValue('--red-500'), documentStyle.getPropertyValue('--gray-500')],
-          hoverBackgroundColor: [documentStyle.getPropertyValue('--blue-400'), documentStyle.getPropertyValue('--yellow-400'), documentStyle.getPropertyValue('--green-400'), documentStyle.getPropertyValue('--red-400'), documentStyle.getPropertyValue('--gray-400')]
-        }
-      ]
+        labels: mutatedAvailableRoomTypes.value.labels,
+        datasets: [
+            {
+                data: mutatedAvailableRoomTypes.value.data,
+                backgroundColor: [
+                    documentStyle.getPropertyValue("--cyan-500"),
+                    documentStyle.getPropertyValue("--orange-500"),
+                    documentStyle.getPropertyValue("--gray-500"),
+                    documentStyle.getPropertyValue("--red-500"),
+                    documentStyle.getPropertyValue("--yellow-500"),
+                ],
+                hoverBackgroundColor: [
+                    documentStyle.getPropertyValue("--cyan-400"),
+                    documentStyle.getPropertyValue("--orange-400"),
+                    documentStyle.getPropertyValue("--gray-400"),
+                    documentStyle.getPropertyValue("--red-400"),
+                    documentStyle.getPropertyValue("--yellow-400"),
+                ],
+            },
+        ],
     };
-  };
+};
 </script>
-
-<style lang="scss" scoped></style>

@@ -1,50 +1,80 @@
 <template>
-    <div class="">
-      <h1 class="mb-6 text-2xl font-semibold">Reservation By Role</h1>
-      <Chart type="pie" :data="chartData" :options="chartOptions" class="w-full" />
+    <div class="flex flex-col h-full">
+        <h1 class="mb-4 text-2xl font-semibold text-center">
+            Reservation By Role
+        </h1>
+        <div class="relative flex-1">
+            <Chart
+                ref="chartComponent"
+                type="pie"
+                :data="chartData"
+                :options="chartOptions"
+                class="absolute top-0 left-0 w-full h-full"
+            />
+        </div>
     </div>
-  </template>
+</template>
 
-  <script setup>
-    import Chart from "primevue/chart"
-    import { ref, onMounted, computed } from "vue"
+<script setup>
+import Chart from "primevue/chart";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 
-    const props = defineProps({
-      reservationByRole: Object
-    })
+// 1. Buat ref untuk komponen Chart
+const chartComponent = ref(null);
 
-    const mutatedAvailableRoomTypes = computed(() => ({ labels: Object.keys(props.reservationByRole), data: Object.values(props.reservationByRole) }))
+const props = defineProps({
+    reservationByRole: Object,
+});
 
-    const chartData = ref({});
-    const chartOptions = ref({
-      plugins: {
-        legend: {
-          position: "bottom",
-          labels: {
-            usePointStyle: true,
-          }
-        }
-      }
-    });
+const mutatedAvailableRoomTypes = computed(() => ({
+    labels: Object.keys(props.reservationByRole),
+    data: Object.values(props.reservationByRole),
+}));
 
-    onMounted(() => {
-      chartData.value = setChartData();
-    });
+const chartData = ref({});
+const chartOptions = ref({
+    responsive: true,
+    maintainAspectRatio: false,
+});
 
-    const setChartData = () => {
-      const documentStyle = getComputedStyle(document.body);
+// 2. Buat fungsi untuk merender ulang chart
+const redrawChart = () => {
+    // Pastikan komponen chart sudah ada sebelum memanggil method-nya
+    if (chartComponent.value) {
+        chartComponent.value.reinit(); // reinit() adalah method dari PrimeVue untuk menggambar ulang
+    }
+};
 
-      return {
+onMounted(() => {
+    chartData.value = setChartData();
+    // 3. Tambahkan listener saat komponen selesai di-mount
+    window.addEventListener("resize", redrawChart);
+});
+
+onBeforeUnmount(() => {
+    // 4. Hapus listener saat komponen akan di-unmount untuk mencegah memory leak
+    window.removeEventListener("resize", redrawChart);
+});
+
+const setChartData = () => {
+    const documentStyle = getComputedStyle(document.body);
+    return {
         labels: mutatedAvailableRoomTypes.value.labels,
         datasets: [
-          {
-            data: mutatedAvailableRoomTypes.value.data,
-            backgroundColor: [documentStyle.getPropertyValue('--blue-500'), documentStyle.getPropertyValue('--yellow-500'), documentStyle.getPropertyValue('--green-500'), documentStyle.getPropertyValue('--red-500'), documentStyle.getPropertyValue('--gray-500')],
-            hoverBackgroundColor: [documentStyle.getPropertyValue('--blue-400'), documentStyle.getPropertyValue('--yellow-400'), documentStyle.getPropertyValue('--green-400'), documentStyle.getPropertyValue('--red-400'), documentStyle.getPropertyValue('--gray-400')]
-          }
-        ]
-      };
+            {
+                data: mutatedAvailableRoomTypes.value.data,
+                backgroundColor: [
+                    documentStyle.getPropertyValue("--blue-500"),
+                    documentStyle.getPropertyValue("--yellow-500"),
+                    documentStyle.getPropertyValue("--green-500"),
+                ],
+                hoverBackgroundColor: [
+                    documentStyle.getPropertyValue("--blue-400"),
+                    documentStyle.getPropertyValue("--yellow-400"),
+                    documentStyle.getPropertyValue("--green-400"),
+                ],
+            },
+        ],
     };
-  </script>
-
-  <style lang="scss" scoped></style>
+};
+</script>
