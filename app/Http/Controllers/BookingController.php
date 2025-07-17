@@ -24,25 +24,34 @@ class BookingController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $roomTypes = RoomType::get(["id", "name"]);
-        if (request()->has("from_date") || request()->has("to_date") || request()->has("room_type_id")) {
-            $rooms       = Room::search(request(['from_date', 'to_date']))->orWhereIn("room_type_id", explode(",", request("room_type_id")))->with('roomType')->get();
-            $searchRooms = [];
-            //avaiable rooms but only one room for a particular room-type
-            foreach ($rooms as $room) {
-                if (!isset($searchRooms[$room->room_type_id]))
-                    $searchRooms[$room->room_type_id] = $room;
-            }
-            return Inertia::render('Welcome', [
-                'searchRooms' => $searchRooms,
-                'roomTypes' => $roomTypes
-            ]);
+{
+    // Ambil semua tipe kamar dari database
+    $roomTypes = RoomType::all()->map(function ($type) {
+        $imageName = strtolower($type->name) . '.jpg'; // contoh: deluxe.jpg
+        $type->image_url = asset('images/' . $imageName);
+        return $type;
+    });
+
+    if (request()->has("from_date") || request()->has("to_date") || request()->has("room_type_id")) {
+        // ... (logika pencarian yang sudah ada tetap di sini)
+        $rooms       = Room::search(request(['from_date', 'to_date']))->orWhereIn("room_type_id", explode(",", request("room_type_id")))->with('roomType')->get();
+        $searchRooms = [];
+        //avaiable rooms but only one room for a particular room-type
+        foreach ($rooms as $room) {
+            if (!isset($searchRooms[$room->room_type_id]))
+                $searchRooms[$room->room_type_id] = $room;
         }
-        return Inertia::render("Welcome", [
-            "roomTypes" => $roomTypes
+        return Inertia::render('Welcome', [
+            'searchRooms' => $searchRooms,
+            'roomTypes' => $roomTypes
         ]);
     }
+
+    // Kirim data roomTypes ke view Welcome
+    return Inertia::render("Welcome", [
+        "roomTypes" => $roomTypes
+    ]);
+}
 
     /**
      * Store a newly created resource in storage.

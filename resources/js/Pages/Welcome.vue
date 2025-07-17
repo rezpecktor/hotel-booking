@@ -32,6 +32,29 @@ const searchParams = new URLSearchParams(document.location.search);
                 </h2>
             </div>
             <WelcomeFiler :room-types="roomTypes" />
+            <div class="mt-16" v-if="!searchRooms">
+                <h3 class="mb-6 text-4xl font-bold text-gray-800">
+                    Tipe Kamar Kami
+                </h3>
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+                    <div
+                        v-for="roomType in roomTypes"
+                        :key="roomType.id"
+                        class="overflow-hidden bg-white rounded-lg shadow-lg"
+                    >
+                        <img
+                            :src="roomType.image_url"
+                            :alt="roomType.name"
+                            class="object-cover w-full h-56"
+                        />
+                        <div class="p-6">
+                            <h4 class="text-2xl font-semibold text-gray-900">
+                                {{ roomType.name }}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <SearchRooms
                 :search-rooms="searchRooms"
                 :errors="errors"
