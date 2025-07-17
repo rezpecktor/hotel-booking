@@ -1,25 +1,22 @@
-<template>
-  <div class="flex justify-center min-w-full min-h-screen bg-indigo-600">
-    <div
-      class=" md:w-[26rem] md:mx-0 min-h-[20rem] self-center w-full mx-3 bg-white border rounded shadow-xl p-3 group my-20">
-      <div class="flex flex-col items-start mb-3">
-        <Link
-          class=" group-hover:text-indigo-700 text-5xl font-extrabold text-center text-indigo-600 transition-colors duration-300"
-          href="/">
-        Laracamp
-        </Link>
-        <Link
-          class=" group-hover:text-indigo-700 text-5xl font-extrabold text-center text-indigo-600 transition-colors duration-300"
-          href="/">
-        Booking
-        </Link>
-      </div>
-      <div class="">
-        <slot />
-      </div>
-    </div>
-  </div>
-</template>
 <script setup>
-  import { Link } from "@inertiajs/vue3";
+import { Link } from "@inertiajs/vue3";
 </script>
+<template>
+    <div
+        class="flex items-center justify-center w-screen h-screen bg-slate-100"
+    >
+        <div
+            class="w-full p-6 m-4 bg-white rounded-lg shadow-lg md:w-1/2 xl:w-1/3"
+        >
+            <div class="mb-6 text-center">
+                <!-- PERUBAHAN ADA DI BARIS INI -->
+                <Link
+                    :href="route('index')"
+                    class="text-5xl font-extrabold text-indigo-600"
+                    >Raysa Homestay Syariah</Link
+                >
+            </div>
+            <slot />
+        </div>
+    </div>
+</template>
