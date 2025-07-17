@@ -96,7 +96,8 @@ class BookingController extends Controller
     // --- PERUBAHAN DI SINI ---
     $fromDate = Carbon::parse($request->from_date);
     $toDate = Carbon::parse($request->to_date);
-    $duration = $toDate->diffInDays($fromDate) + 1;
+    // Hitung selisih malam, pastikan minimal 1
+    $duration = $toDate->diffInDays($fromDate) > 0 ? $toDate->diffInDays($fromDate) : 1;
     // --- AKHIR PERUBAHAN ---
 
     $totalPrice = $roomType->price * $duration;
