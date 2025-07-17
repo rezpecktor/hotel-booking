@@ -15,15 +15,13 @@
                     &copy; 2025 Raysa Homestay. All Rights Reserved.
                 </p>
                 <div class="flex mt-4 sm:mt-0">
-                    <a href="#" class="px-2 text-gray-400 hover:text-white"
-                        >Facebook</a
+                    <a
+                        href="https://www.instagram.com/raysa_homestay_pekanbaru?igsh=MWtwNWx6bzR5Z3dxZQ=="
+                        target="_blank"
+                        class="px-2 text-gray-400 hover:text-white"
                     >
-                    <a href="#" class="px-2 text-gray-400 hover:text-white"
-                        >Twitter</a
-                    >
-                    <a href="#" class="px-2 text-gray-400 hover:text-white"
-                        >Instagram</a
-                    >
+                        Instagram
+                    </a>
                 </div>
             </div>
         </div>

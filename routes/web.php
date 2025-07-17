@@ -41,6 +41,7 @@ Route::middleware(['auth', 'admin'])->prefix("admin")->as("admin.")->group(funct
     Route::put('/reservations/{booking}/confirm', [ReservationController::class, 'confirm'])->name('reservations.confirm');
     Route::put('/reservations/{booking}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
     Route::put('/reservations/{booking}/checkin', [ReservationController::class, 'checkin'])->name('reservations.checkin');
+    Route::put('/reservations/{booking}/checkout', [ReservationController::class, 'checkout'])->name('reservations.checkout');
 
 
     // Room

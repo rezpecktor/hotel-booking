@@ -28,7 +28,6 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        // LOGIKA CACHE DIHAPUS, SEKARANG SELALU MENGAMBIL DATA BARU
         $reservations = Reservation::with('user', 'rooms:room_number')
             ->search(request(['from_date', 'to_date']))
             ->latest()
@@ -43,7 +42,7 @@ class ReservationController extends Controller
                 'from_date' => $reservation->from_date,
                 'to_date' => $reservation->to_date,
                 'checkin_time' => $reservation->checkin_time,
-                'checkout_time' => $reservation->checkout_time,
+                'checkout_time' => $reservation->checkout_time, // Memastikan data ini selalu diambil
                 'status' => $reservation->status,
             ]);
 
@@ -51,9 +50,6 @@ class ReservationController extends Controller
             'reservations' => $reservations
         ]);
     }
-
-    // ... sisa method lainnya tetap sama ...
-    // (copy-paste seluruh kode di bawah ini untuk memastikan tidak ada yang terlewat)
 
     /**
      * Show the form for creating a new resource.
@@ -91,13 +87,10 @@ class ReservationController extends Controller
             $reservation->checkin_time = $request->checkin_time ? (new Carbon($request->checkin_time))->toDateTimeString() : null;
             $reservation->checkout_time =$request->checkout_time? (new Carbon($request->checkout_time))->toDateTimeString(): null;
             $reservation->save();
-
             $reservation->rooms()->attach($request->room_id);
-
             DB::commit();
             Cache::flush();
             return redirect()->route('admin.reservations.index');
-
         } catch (\Exception $e) {
             DB::rollback();
         }
@@ -161,7 +154,6 @@ class ReservationController extends Controller
         }
 
         DB::table('reservation_room')->where('reservation_id',$reservation->id)->delete();
-
         foreach($request->room_id as $room){
             DB::table('reservation_room')->insert([
                 'room_id'=>$room,
@@ -172,7 +164,6 @@ class ReservationController extends Controller
 
         $reservation->save();
         Cache::flush();
-
         return redirect()->route('admin.reservations.index');
     }
 
@@ -184,7 +175,6 @@ class ReservationController extends Controller
         DB::table('reservation_room')->where('reservation_id',$reservation->id)->delete();
         $reservation->delete();
         Cache::flush();
-
         return redirect()->route('admin.reservations.index')->isSuccessful();
     }
 
@@ -204,35 +194,36 @@ class ReservationController extends Controller
     public function confirm(Reservation $booking)
     {
         $this->authorize('update', $booking);
-
         $booking->status = 'confirmed';
         $booking->save();
-
         Cache::flush();
-
         return redirect()->route('admin.reservations.index')->with('message', 'Booking has been confirmed successfully.');
     }
 
     public function cancel(Reservation $booking)
     {
         $this->authorize('update', $booking);
-
         $booking->status = 'canceled';
         $booking->save();
-
         Cache::flush();
-
         return redirect()->route('admin.reservations.index')->with('message', 'Booking has been canceled.');
     }
+
     public function checkin(Reservation $booking)
-{
-    $this->authorize('update', $booking);
+    {
+        $this->authorize('update', $booking);
+        $booking->checkin_time = now();
+        $booking->save();
+        return redirect()->route('admin.reservations.index')->with('message', 'Guest checked-in successfully.');
+    }
 
-    $booking->checkin_time = now(); // Mengisi waktu check-in dengan waktu sekarang
-    $booking->save();
-
-    return redirect()->route('admin.reservations.index')->with('message', 'Guest checked-in successfully.');
+    // --- METHOD BARU DITAMBAHKAN DI SINI ---
+    public function checkout(Reservation $booking)
+    {
+        $this->authorize('update', $booking);
+        $booking->checkout_time = now(); // Mengisi waktu check-out dengan waktu sekarang
+        $booking->save();
+        Cache::flush();
+        return redirect()->route('admin.reservations.index')->with('message', 'Guest checked-out successfully.');
+    }
 }
-}
-
-

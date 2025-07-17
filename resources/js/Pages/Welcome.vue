@@ -5,12 +5,13 @@ import { Head, Link, usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 import { useDialog } from "primevue/usedialog";
 import Button from "primevue/button";
+import Chip from "primevue/chip"; // Import komponen Chip
 
 const props = defineProps({
     errors: Object,
     roomTypes: Object,
     searchRooms: {
-        type: [Object, Array], // Bisa array atau object, kita buat fleksibel
+        type: [Object, Array],
         required: false,
     },
     searchParams: {
@@ -19,25 +20,20 @@ const props = defineProps({
     },
 });
 
-// Mengecek apakah pengguna sudah login
 const user = computed(() => usePage().props.auth.user);
 
-// Mengecek apakah pencarian sedang aktif
 const isSearching = computed(() => {
     return props.searchRooms !== null && props.searchRooms !== undefined;
 });
 
 const dialog = useDialog();
 
-// Fungsi untuk membuka modal pemesanan
 function openBookingDialog(roomType) {
-    // Jika user belum login, arahkan ke halaman login
     if (!user.value) {
         window.location.href = route("login");
         return;
     }
 
-    // Jika sudah login, buka modal
     dialog.open(BookingForm, {
         props: {
             header: "Formulir Pemesanan",
@@ -58,7 +54,7 @@ function openBookingDialog(roomType) {
         <div
             class="md:max-w-[75rem] max-w-2xl flex-col items-center justify-center mx-auto py-24 px-3"
         >
-            <div class="mb-20">
+            <div class="mb-16 text-center">
                 <h1 class="mb-3 text-6xl font-bold">
                     Welcome to
                     <span class="text-6xl font-extrabold text-indigo-600"
@@ -68,6 +64,26 @@ function openBookingDialog(roomType) {
                 <h2 class="text-3xl font-normal">
                     We offer the world-class hospitality with luxury experience.
                 </h2>
+                <p class="mt-4 text-lg text-gray-500">
+                    <i class="pi pi-map-marker" style="font-size: 1rem"></i>
+                    Jl. HR. Soebrantas Gg. Iman No.55, Simpang Baru, Kec.
+                    Tampan, Kota Pekanbaru, Riau 28293
+                </p>
+            </div>
+
+            <div class="mb-20">
+                <h3 class="mb-6 text-4xl font-bold text-center text-gray-800">
+                    Fasilitas Unggulan Kami
+                </h3>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <Chip label="Tempat Tidur (Double)" icon="pi pi-bed" />
+                    <Chip label="Pendingin Ruangan (AC)" icon="pi pi-sun" />
+                    <Chip label="Kamar Mandi Dalam" icon="pi pi-bath" />
+                    <Chip label="Smart TV 28”" icon="pi pi-desktop" />
+                    <Chip label="Meja & Kursi" icon="pi pi-table" />
+                    <Chip label="Lemari Pakaian" icon="pi pi-box" />
+                    <Chip label="Wi-Fi Gratis" icon="pi pi-wifi" />
+                </div>
             </div>
 
             <WelcomeFilter :room-types="roomTypes" />
@@ -105,7 +121,6 @@ function openBookingDialog(roomType) {
                                 <p class="mb-2 text-sm text-gray-500">
                                     per malam
                                 </p>
-
                                 <Button
                                     v-if="roomType.available_count > 0"
                                     label="Pesan Sekarang"
@@ -169,7 +184,7 @@ import DynamicDialog from "primevue/dynamicdialog";
 export default {
     layout: IndexLayout,
     components: {
-        DynamicDialog, // Daftarkan komponen DynamicDialog agar bisa digunakan
+        DynamicDialog,
     },
 };
 </script>

@@ -107,7 +107,6 @@
         <!-- Kolom Actions yang Diperbarui dengan Logika Check-in -->
         <Column header="Actions" class="w-52">
             <template #body="slotProps">
-                <!-- Aksi untuk status 'pending' -->
                 <div
                     v-if="slotProps.data.status === 'pending'"
                     class="flex gap-2"
@@ -128,12 +127,10 @@
                     />
                 </div>
 
-                <!-- Aksi untuk status 'confirmed' -->
                 <div
                     v-else-if="slotProps.data.status === 'confirmed'"
                     class="flex gap-2"
                 >
-                    <!-- Tombol Check-in BARU KITA -->
                     <Button
                         v-if="!slotProps.data.checkin_time"
                         label="Check-in"
@@ -142,7 +139,16 @@
                         class="p-button-primary"
                         @click="checkinBooking(slotProps.data.id)"
                     />
-                    <!-- Tombol Hapus hanya muncul setelah check-in -->
+
+                    <Button
+                        v-else-if="!slotProps.data.checkout_time"
+                        label="Check-out"
+                        icon="pi pi-sign-out"
+                        size="small"
+                        class="p-button-warning"
+                        @click="checkoutBooking(slotProps.data.id)"
+                    />
+
                     <Button
                         v-else
                         aria-label="Delete"
@@ -154,7 +160,6 @@
                     />
                 </div>
 
-                <!-- Aksi untuk status 'canceled' -->
                 <div v-else class="flex gap-2">
                     <Button
                         aria-label="Delete"
@@ -250,6 +255,24 @@ function checkinBooking(bookingId) {
         accept: () => {
             router.put(
                 route("admin.reservations.checkin", bookingId),
+                {},
+                {
+                    preserveScroll: true,
+                }
+            );
+        },
+    });
+}
+
+function checkoutBooking(bookingId) {
+    confirm.require({
+        message: "Are you sure this guest is checking out?",
+        header: "Check-out Confirmation",
+        icon: "pi pi-info-circle",
+        acceptClass: "p-button-warning",
+        accept: () => {
+            router.put(
+                route("admin.reservations.checkout", bookingId),
                 {},
                 {
                     preserveScroll: true,
