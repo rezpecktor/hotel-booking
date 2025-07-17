@@ -12,7 +12,8 @@ class StoreBookingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->role_id === 2;
+        // Memastikan hanya pengguna yang sudah login yang bisa membuat pesanan.
+        return Auth::check();
     }
 
     /**
@@ -23,11 +24,14 @@ class StoreBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'room_id.*' => 'required|exists:rooms,id',
-            "guest_name"=>"required|min:3|max:255",
-            'total_person'=>"required|integer|min:1",
-            'from_date' => 'required|date',
-            'to_date' => 'required|date'
+            // Validasi sekarang berdasarkan room_type_id
+            'room_type_id' => 'required|exists:room_types,id',
+
+            // Aturan lain yang dikirim dari form modal
+            "guest_name" => "required|min:3|max:255",
+            'total_person' => "required|integer|min:1",
+            'from_date' => 'required|date|after_or_equal:today',
+            'to_date' => 'required|date|after:from_date'
         ];
     }
 }

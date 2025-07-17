@@ -2,17 +2,18 @@
 
 namespace Database\Seeders;
 
+use App\Models\RoomType;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RoomTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('room_types')->insert([
-            ['name' => 'Standart', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Deluxe', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Executive', 'created_at' => now(), 'updated_at' => now()],
+        RoomType::insert([
+            ['name' => 'Standart', 'price' => 200000],
+            ['name' => 'Deluxe', 'price' => 250000],
+            ['name' => 'Executive', 'price' => 300000]
         ]);
     }
 }

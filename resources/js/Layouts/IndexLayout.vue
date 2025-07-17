@@ -1,5 +1,18 @@
+<script setup>
+import LayoutButton from "@/Components/IndexLayout.vue/LayoutButton.vue";
+import { Link, router, usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
+import DynamicDialog from "primevue/dynamicdialog";
+import Toast from "primevue/toast"; // Import Toast juga untuk notifikasi
+import Footer from "@/Components/Footer.vue";
+
+const user = computed(() => usePage().props.auth.user);
+</script>
+
 <template>
-    <div class="">
+    <div class="min-h-screen bg-gray-100">
+        <Toast position="top-right" />
+        <DynamicDialog />
         <header
             class="sticky inset-0 top-0 z-20 px-3 m-3 bg-indigo-600 rounded drop-shadow-xl"
             v-memo="[user]"
@@ -13,7 +26,6 @@
                     </h1>
                 </Link>
                 <div class="flex items-center justify-end w-auto">
-                    <div class="mr-3"></div>
                     <div
                         class="flex items-center w-full h-full p-3 mr-3 transition-colors duration-300 rounded cursor-pointer"
                         v-if="user"
@@ -66,16 +78,11 @@
                 </div>
             </div>
         </header>
-        <div class="px-3 rounded">
+
+        <main class="px-3 rounded">
             <slot />
-        </div>
+        </main>
+
+        <Footer />
     </div>
 </template>
-<script setup>
-import LayoutButton from "@/Components/IndexLayout.vue/LayoutButton.vue";
-import { Link, router, usePage } from "@inertiajs/vue3";
-import Button from "primevue/button";
-import { computed } from "vue";
-
-const user = computed(() => usePage().props.auth.user);
-</script>
