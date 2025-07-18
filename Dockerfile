@@ -17,6 +17,7 @@ COPY --from=frontend /app/public/build ./public/build
 RUN composer install --no-dev --optimize-autoloader
 
 # Run optimizations for production
+RUN php artisan key:generate --force
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
