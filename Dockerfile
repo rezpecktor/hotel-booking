@@ -9,22 +9,36 @@ RUN npm run build
 # Stage 2: Build PHP Application
 FROM php:8.2-fpm-alpine as app
 WORKDIR /var/www/html
-RUN apk add --no-cache oniguruma-dev libxml2-dev libzip-dev
+
+# --- PERBAIKAN DI SINI: MENAMBAHKAN DEPENDENCY YANG DIBUTUHKAN ---
+RUN apk add --no-cache $PHPIZE_DEPS \
+    oniguruma-dev \
+    libxml2-dev \
+    libzip-dev \
+    curl-dev
+
+# Install PHP extensions
 RUN docker-php-ext-install bcmath ctype fileinfo mbstring pdo pdo_mysql tokenizer xml zip
+
+# Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy application files and built assets
 COPY . .
 COPY --from=frontend /app/public/build ./public/build
+
+# Install Composer dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# --- PERBAIKAN PENTING DI SINI ---
+# Run optimizations for production
 RUN php artisan key:generate --force
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
-# Memberikan izin tulis ke folder storage dan bootstrap/cache
+
+# Set permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
-# --- AKHIR PERBAIKAN ---
 
 # Stage 3: Final Production Image with Caddy Web Server
 FROM caddy:2-alpine
