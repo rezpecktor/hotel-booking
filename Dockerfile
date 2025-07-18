@@ -1,36 +1,28 @@
-# Stage 1: Build Frontend Assets
-FROM node:18-alpine as frontend
+# Stage 1: Install PHP dependencies with Composer
+FROM composer:2 as vendor
 WORKDIR /app
-COPY package*.json ./
+COPY database/ database/
+COPY composer.json composer.json
+COPY composer.lock composer.lock
+RUN composer install \
+    --ignore-platform-reqs \
+    --no-interaction \
+    --no-plugins \
+    --no-scripts \
+    --prefer-dist
+
+# Stage 2: Build frontend assets with Node.js
+FROM node:18 as frontend
+WORKDIR /app
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 RUN npm install
 COPY . .
 RUN npm run build
 
-# Stage 2: Build PHP Application
-FROM php:8.2-fpm-alpine as app
-WORKDIR /var/www/html
-
-# Install system dependencies
-RUN apk add --no-cache oniguruma-dev libxml2-dev libzip-dev curl-dev
-
-# Install PHP extensions
-RUN docker-php-ext-install bcmath ctype fileinfo mbstring pdo pdo_mysql tokenizer xml zip
-
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Copy application files and built assets
+# Stage 3: Create the final production image
+FROM anothrnick/php-caddy:8.2-fpm
+WORKDIR /app
+COPY --from=vendor /app/vendor/ /app/vendor/
+COPY --from=frontend /app/public/build /app/public/build
 COPY . .
-COPY --from=frontend /app/public/build ./public/build
-
-# Install Composer dependencies
-RUN composer install --no-dev --optimize-autoloader
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html
-
-# Stage 3: Final Production Image with Caddy Web Server
-FROM caddy:2-alpine
-WORKDIR /var/www/html
-COPY --from=app /var/www/html .
-COPY Caddyfile /etc/caddy/Caddyfile
