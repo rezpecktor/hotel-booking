@@ -1,33 +1,30 @@
-# Stage 1: Build Frontend Assets
-FROM node:18-alpine as frontend
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+# Gunakan base image yang sudah berisi PHP, Composer, dan Node.js
+FROM aevitas/php-dev:8.2-cli
 
-# Stage 2: Build PHP Application
-FROM php:8.2-fpm-alpine as app
-WORKDIR /var/www/html
-RUN apk add --no-cache oniguruma-dev libxml2-dev libzip-dev
-RUN docker-php-ext-install bcmath ctype fileinfo mbstring pdo pdo_mysql tokenizer xml zip
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Tentukan direktori kerja
+WORKDIR /app
+
+# Salin semua file proyek
 COPY . .
-COPY --from=frontend /app/public/build ./public/build
+
+# Install dependensi PHP (Composer)
 RUN composer install --no-dev --optimize-autoloader
 
-# Run optimizations for production
-RUN php artisan key:generate --force
+# Install dependensi JavaScript (NPM) dan build aset
+RUN npm install
+RUN npm run build
+
+# Jalankan optimasi Laravel untuk produksi
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
 
-# Set permissions
+# Atur izin folder
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
 
-# Stage 3: Final Production Image with Caddy Web Server
-FROM caddy:2-alpine
-WORKDIR /var/www/html
-COPY --from=app /var/www/html .
-COPY Caddyfile /etc/caddy/Caddyfile
+# Beri tahu port mana yang akan digunakan
+EXPOSE 8080
+
+# Perintah untuk menjalankan aplikasi
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
