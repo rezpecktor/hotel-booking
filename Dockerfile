@@ -28,6 +28,4 @@ RUN chmod -R 775 storage bootstrap/cache
 
 # Stage 3: Final Production Image with Caddy Web Server
 FROM caddy:2-alpine
-WORKDIR /var/www/html
-COPY --from=app /var/www/html .
-COPY Caddyfile /etc/caddy/Caddyfile
+WORKDIR /var/w
