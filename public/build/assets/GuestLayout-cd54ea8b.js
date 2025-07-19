@@ -1,0 +1,1 @@
+import{o as s,f as t,b as o,h as a}from"./app-2dcae80d.js";const r={class:"sm:justify-center sm:pt-0 flex flex-col items-center min-h-screen pt-6"},c={class:"sm:max-w-md sm:rounded-lg w-full px-6 py-4 mt-6 overflow-hidden bg-white shadow-md"},d={__name:"GuestLayout",setup(n){return(e,l)=>(s(),t("div",r,[o("div",c,[a(e.$slots,"default")])]))}};export{d as _};

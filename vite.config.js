@@ -1,17 +1,16 @@
+// vite.config.js
+
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
 import vue from "@vitejs/plugin-vue";
-import vueJsx from "@vitejs/plugin-vue-jsx"; // <-- Tambahan dari kita
 
 export default defineConfig({
     plugins: [
         laravel({
-            // Memastikan CSS dan JS diproses
-            input: ["resources/css/app.css", "resources/js/app.js"],
+            input: "resources/js/app.js",
             refresh: true,
         }),
         vue({
-            // Konfigurasi asli yang penting, kita pertahankan
             template: {
                 transformAssetUrls: {
                     base: null,
@@ -19,6 +18,12 @@ export default defineConfig({
                 },
             },
         }),
-        vueJsx(), // <-- Plugin baru untuk mengatasi error JSX
     ],
+    // --- TAMBAHKAN BLOK DI BAWAH INI ---
+    resolve: {
+        alias: {
+            "ziggy-js": "/vendor/tightenco/ziggy/dist/vue.m",
+        },
+    },
+    // ------------------------------------
 });
