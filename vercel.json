@@ -19,7 +19,7 @@
         "APP_NAME": "RaysaHomestaySyariah",
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://hotel-booking.vercel.app/",
+        "APP_URL": "https://hotel-booking-alpha-flax.vercel.app",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
         "APP_PACKAGES_CACHE": "/tmp/packages.php",
