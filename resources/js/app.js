@@ -6,8 +6,7 @@ import "primevue/resources/themes/lara-light-indigo/theme.css";
 import { createApp, h } from "vue";
 import { createInertiaApp } from "@inertiajs/vue3";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
-// import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/vue.m";
-import { ZiggyVue } from "ziggy-js";
+import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/vue.m";
 
 // 1. IMPORT SEMUA SERVICE YANG DIBUTUHKAN
 import PrimeVue from "primevue/config";
